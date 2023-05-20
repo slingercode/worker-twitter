@@ -4,8 +4,22 @@ import { TweetV2Response } from './types/tweet';
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
     const url = new URL(request.url);
-    const ids = url.searchParams.get('ids');
     const queryParams = new URLSearchParams(apiParams);
+
+    const ids = url.searchParams.get('ids');
+    const authorization = request.headers.get('Authorization');
+
+    if (request.method !== 'GET') {
+      return new Response('405 Method Not Allowed', {
+        status: 405,
+      });
+    }
+
+    if (authorization === null || authorization !== env.BEARER_TOKEN) {
+      return new Response('401 Unauthorized', {
+        status: 401,
+      });
+    }
 
     const response = await fetch(
       `https://api.twitter.com/2/tweets?ids=${ids}&${queryParams.toString()}`,
@@ -26,8 +40,9 @@ export default {
     } = await response.json<TweetV2Response>();
 
     const sanitized = sanitizeResponse(data, media, users, tweets)();
+    const json = JSON.stringify(sanitized);
 
-    return new Response(JSON.stringify(sanitized), {
+    return new Response(json, {
       headers: { 'Content-Type': 'application/json' },
     });
   },

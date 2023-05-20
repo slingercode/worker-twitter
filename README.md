@@ -13,4 +13,5 @@
 
 For local development we should add the env vars to a file called `.dev.vars`
 
+- **BEARER_TOKEN**: Custom token for auth
 - **TWITTER_API_KEY**: Twitter bearer auth token
