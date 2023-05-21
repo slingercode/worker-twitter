@@ -21,6 +21,14 @@ export default {
       });
     }
 
+    const cache = await env.API_EDNOESCO.get('json');
+
+    if (cache) {
+      return new Response(cache, {
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+
     const response = await fetch(
       `https://api.twitter.com/2/tweets?ids=${ids}&${queryParams.toString()}`,
       {
@@ -41,6 +49,8 @@ export default {
 
     const sanitized = sanitizeResponse(data, media, users, tweets)();
     const json = JSON.stringify(sanitized);
+
+    await env.API_EDNOESCO.put('json', json, { expirationTtl: 60 * 10 });
 
     return new Response(json, {
       headers: { 'Content-Type': 'application/json' },
